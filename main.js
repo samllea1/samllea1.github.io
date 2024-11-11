@@ -1,8 +1,7 @@
-const version = "1.1.2 (TESTING)";
+const version = "1.1.3 (TESTING)";
 
 const whats_new = `
--Removed Listen Blocks
--fixed major bugs
+-Removed Listen Blocks\n-fixed major bugs
 `;
 
 $("html").on("keydown", (e) => {
