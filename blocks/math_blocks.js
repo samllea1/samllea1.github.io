@@ -208,7 +208,7 @@ Blockly.Blocks["MATH_random_integer"] = {
             .appendField("to");
         this.appendValueInput("ran2")
             .setCheck("Number");
-        this.setOutput(true, "String");
+        this.setOutput(true, "Number");
         this.setColour("#6b00de");
         this.setTooltip("");
         this.setHelpUrl("");
@@ -231,7 +231,7 @@ Blockly.Blocks["MATH_random_float"] = {
             .appendField("to");
         this.appendValueInput("ran2")
             .setCheck("Number");
-        this.setOutput(true, "String");
+        this.setOutput(true, "Number");
         this.setColour("#6b00de");
         this.setTooltip("");
         this.setHelpUrl("");
