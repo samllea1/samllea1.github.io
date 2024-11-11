@@ -1,34 +1,9 @@
-Blockly.Blocks["GB_startlistenfor"] = {
-  init: function () {
-      this.setPreviousStatement(true, null);
-      this.setNextStatement(true, null);
-      this.appendDummyInput()
-          .appendField("Start Listening For When A")
-          .appendField(
-              new Blockly.FieldDropdown([
-                  ["Object Is Spawned", "ListenForInstantiation"],
-                  ["Chat Message Is Sent", "ListenForChat"],
-              ]),
-              "dropdown"
-          );
-      this.setOutput(false, "null");
-      this.setColour("#ffc31f");
-      this.setTooltip("");
-      this.setHelpUrl("");
-  },
-};
-
-javascript.javascriptGenerator.forBlock['GB_startlistenfor'] = function(block) {
-  const dropdownOption = block.getFieldValue('dropdown');
-  return dropdownOption;
-};
-
 Blockly.Blocks["GB_OnStart"] = {
   init: function () {
       this.appendDummyInput()
           .appendField("when ever the script starts, run code:");
       this.setNextStatement(true, null);
-      this.setColour("#ffc31f");
+      this.setColour("#ffbc03");
       this.setTooltip("");
       this.setHelpUrl("");
   },
@@ -44,50 +19,34 @@ javascript.javascriptGenerator.forBlock['GB_OnStart'] = function(block) {
   return prependCode + code;
 };
 
-Blockly.Blocks["GB_OnFunction"] = {
-  init: function () {
-      this.appendDummyInput()
-          .appendField("When ever a ")
-          .appendField(
-              new Blockly.FieldDropdown([
-                  ["Object Is Spawned", "Instantiated"],
-                  ["Chat Message is Sent", "OnChatMessage"],
-              ]),
-              "eventName"
-          );
-      this.setNextStatement(true, null);
-      this.setColour("#ffc31f");
-      this.setTooltip("");
-      this.setHelpUrl("");
-  },
+Blockly.Blocks['GB_OnFunction'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("Whenever a")
+        .appendField(new Blockly.FieldDropdown([["Object Is Spawned","Instantiated"], ["Chat Message is Sent","Chatted"]]), 'eventName')
+        .appendField("run code:");
+    this.appendStatementInput("DO")
+        .setCheck(null);
+    this.setNextStatement(false, null);
+    this.setColour("#ffbc03");
+    this.setTooltip("");
+    this.setHelpUrl("");
+  }
 };
 
-javascript.javascriptGenerator.forBlock['GB_OnFunction'] = function(block) {
+javascript.javascriptGenerator.forBlock['GB_OnFunction'] = function(block, generator) {
   const eventName = block.getFieldValue('eventName');
-  let code = '';
-  const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
-  if (nextBlock) {
-    code = Blockly.JavaScript.statementToCode(block, '');
-  }
-
-  let prependCode = '';
-
+  var statements_do = generator.statementToCode(block, 'DO');
+  var code = '';
   if (eventName === 'Instantiated') {
-      return prependCode + `
-OnInstantiation = function(args) {
-${code}
-}
-`;
-  } else if (eventName === 'OnChatMessage') {
-      return prependCode + `
-OnChatMessage = function(args) {
-${code}
-}
-`;
+    code = 'OnInstantiation = function(args)\n' + statements_do + '\nend function\n';
+  } else if (eventName === 'Chatted') {
+    code = 'OnChatMessage = function(args)\n' + statements_do + '\nend function\n';
   }
 
-  return '';
+  return code;
 };
+
 
 Blockly.Blocks["GB_print"] = {
     init: function () {
@@ -156,7 +115,7 @@ Blockly.Blocks["GB_args"] = {
               "dropdown"
           );
       this.setOutput(true, "String");
-      this.setColour("#ffc31f");
+      this.setColour("#ffbc03");
       this.setTooltip("");
       this.setHelpUrl("");
   },

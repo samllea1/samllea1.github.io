@@ -142,11 +142,10 @@ const toolbox = {
         */
         {
             kind: "category",
-            name: "Functions",
-            colour: "#ffc31f",
+            name: "Events",
+            colour: "#ffbc03",
             contents: [
                 block("GB_OnStart"),
-                block("GB_startlistenfor"),
                 block("GB_OnFunction"),
                 block("GB_args"),
 
@@ -411,16 +410,66 @@ $("#Export").click(() => {
     very_end = "";
     menus = 0;
     getID();
-    if (
-        Object.keys(Blockly.serialization.workspaces.save(workspace)).length !== 0
-    ) {
+    
+    // Check for multiple "GB_OnStart" blocks
+    const topBlocks = workspace.getTopBlocks(true);
+    const onStartBlocks = topBlocks.filter(block => block.type === 'GB_OnStart');
+    
+    if (onStartBlocks.length > 1) {
+        alert("Only one Main Hat block is allowed. Please remove the extra blocks.");
+        return;
+    }
+    
+    // Check for GB_OnFunction blocks with duplicate dropdown values
+    const onFunctionBlocks = topBlocks.filter(block => block.type === 'GB_OnFunction');
+    const functionValues = new Map();
+    let listenForInstantiation = false;
+    let listenForChat = false;
+    
+    onFunctionBlocks.forEach(block => {
+        const functionValue = block.getFieldValue('eventName'); // Correct field name for the dropdown
+        console.log(`Function Block: ${block.id}, Dropdown Value: ${functionValue}`); // Debug log
+        if (functionValue === 'Instantiated') {
+            listenForInstantiation = true;
+        }
+        if (functionValue === 'Chatted') {
+            listenForChat = true;
+        }
+        if (functionValues.has(functionValue)) {
+            functionValues.set(functionValue, functionValues.get(functionValue) + 1);
+        } else {
+            functionValues.set(functionValue, 1);
+        }
+    });
+
+    let duplicateFound = false;
+    functionValues.forEach((count, value) => {
+        console.log(`Dropdown Value: ${value}, Count: ${count}`); // Debug log
+        if (count > 1) {
+            duplicateFound = true;
+        }
+    });
+
+    if (duplicateFound) {
+        alert("Only one function per script is allowed with the same dropdown value. Please change or remove the extra blocks.");
+        return;
+    }
+
+    if (Object.keys(Blockly.serialization.workspaces.save(workspace)).length !== 0) {
         workspace.getAllVariables().forEach(v => v.name = name + "_" + v.name);
+        let listeners = "";
+        if (listenForInstantiation) {
+            listeners += "ListenForInstantiation\n";
+        }
+        if (listenForChat) {
+            listeners += "ListenForChat\n";
+        }
         download(
             `// Made with GoreBox Mod Maker ${version}
 // use GoreBox Mod Maker at "https://samllea1.github.io/GoreBox-Mod-Maker/"
-\n\n` +
-getCode() +
-`
+${listeners}\n\n` +
+            getCode() +
+            `
 ${end}
 ${very_end}
 while true 
@@ -437,7 +486,22 @@ end while`,
 });
 
 function getCode() {
-    return Blockly.JavaScript.workspaceToCode(workspace);
+    // Initialize workspace
+    const topBlocks = workspace.getTopBlocks(true);
+    let onStartBlockCode = '';
+    let otherBlocksCode = '';
+
+    // Iterate through all top-level blocks
+    topBlocks.forEach(block => {
+        if (block.type === 'GB_OnStart') {
+            onStartBlockCode += Blockly.JavaScript.blockToCode(block);
+        } else {
+            otherBlocksCode += Blockly.JavaScript.blockToCode(block);
+        }
+    });
+
+    // Combine other blocks' code and the "GB_OnStart" block at the end
+    return otherBlocksCode + "\n" + onStartBlockCode;
 }
 
 function download(content, filename, contentType = "text/plain") {
