@@ -1,7 +1,8 @@
-const version = "0.0.1 (TESTING)";
+const version = "1.1.2 (TESTING)";
 
 const whats_new = `
-Welcome to GoreBox Mod Maker, where you can make gorebox mods easily!!
+-Removed Listen Blocks
+-fixed major bugs
 `;
 
 $("html").on("keydown", (e) => {
